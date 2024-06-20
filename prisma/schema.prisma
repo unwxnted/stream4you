@@ -24,6 +24,8 @@ model User{
 model Audio {
   id       Int    @id @default(autoincrement())
   title    String
+  genre    String
+  artist   String
   path     String
   user_id  Int
   User     User   @relation(fields: [user_id], references: [id])

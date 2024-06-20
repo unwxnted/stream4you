@@ -22,13 +22,13 @@ class AudioController {
     }
 
     async query(req: Request, res: Response) {
-        const { title } = req.query;
+        const { search } = req.query;
         try {
             let query = {
                 index: 'audio',
                 q: ''
             };
-            if (title !== undefined) query.q = title.toString();
+            if (search !== undefined) query.q = search.toString();
             let body;
             esClient.search(query)
                 .then(resp => {
@@ -49,6 +49,7 @@ class AudioController {
 
     async getById(req: Request, res: Response) {
         const { id } = req.params;
+        console.log(id)
         if (id === undefined) return res.status(400).json({ 'Error': 'id missing' });
         try {
             const audio = await prisma.audio.findUnique({
@@ -113,12 +114,12 @@ class AudioController {
     }
 
     async post(req: Request, res: Response) {
-        const { title } = req.body;
+        const { title, artist, genre } = req.body;
         const file = req.file;
         const filename: any = file?.filename;
         const { jwt }: any = req;
 
-        if (title === undefined) {
+        if (title === undefined || artist === undefined || genre === undefined) {
             removeFile(filename)
             return res.sendStatus(400);
         }
@@ -132,9 +133,13 @@ class AudioController {
             }
         });
 
+        if(user_id.length < 1) return res.status(404).json({'Error':'User Not found'});
+
         const audio = await prisma.audio.create({
             data: {
                 title,
+                artist,
+                genre,
                 path: filename,
                 user_id: user_id['id']
             }
@@ -145,7 +150,8 @@ class AudioController {
             id: audio.id.toString(),
             body: {
                 title: audio.title,
-                path: audio.path,
+                artist: audio.artist,
+                genre: audio.genre,
                 user_id: audio.user_id
             }
         });
