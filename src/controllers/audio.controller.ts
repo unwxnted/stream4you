@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma, esClient } from '../libs/clients.lib'
 import { Request, Response } from "express";
 import { removeFile } from "../libs/file.lib";
 import ffmpeg from "fluent-ffmpeg";
@@ -8,17 +8,42 @@ ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 import * as fs from 'fs';
 
-const prisma = new PrismaClient();
 
 class AudioController {
 
-    async getAll(req : Request, res: Response){
-        try{
+    async getAll(req: Request, res: Response) {
+        try {
             const audios = await prisma.audio.findMany();
             return res.json(audios);
-        }catch(e){
+        } catch (e) {
             console.error(e);
-            return res.status(500).json({'Error': 'Error on returning data'});
+            return res.status(500).json({ 'Error': 'Error on returning data' });
+        }
+    }
+
+    async query(req: Request, res: Response) {
+        const { title } = req.query;
+        try {
+            let query = {
+                index: 'audio',
+                q: ''
+            };
+            if (title !== undefined) query.q = title.toString();
+            let body;
+            esClient.search(query)
+                .then(resp => {
+                    body=resp.hits.hits;
+                    body = body.map(hit=>hit._source);
+                    res.json(body);
+                })
+                .catch(err => {
+                    console.log(err);
+                    return res.sendStatus(500);
+                });
+            
+        }catch(e){
+            console.log(e);
+            return res.status(500).json({'Error': 'Error on Searching process'});
         }
     }
 
@@ -107,13 +132,23 @@ class AudioController {
             }
         });
 
-        await prisma.audio.create({
+        const audio = await prisma.audio.create({
             data: {
                 title,
                 path: filename,
                 user_id: user_id['id']
             }
         })
+
+        await esClient.index({
+            index: 'audio',
+            id: audio.id.toString(),
+            body: {
+                title: audio.title,
+                path: audio.path,
+                user_id: audio.user_id
+            }
+        });
 
         return res.sendStatus(200);
 

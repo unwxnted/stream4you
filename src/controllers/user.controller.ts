@@ -1,11 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../libs/clients.lib";
 import { Request, Response } from "express";
 import { encryptPassword } from "../libs/auth.lib";
 import * as jsonwebtoken from 'jsonwebtoken';
 
 const { SECRET }: any = process.env;
-
-const prisma = new PrismaClient();
 
 class UserController {
 

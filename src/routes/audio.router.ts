@@ -1,10 +1,11 @@
-import { Router } from "express";
+import { NextFunction, Router } from "express";
 import { upload } from "../libs/file.lib";
 import audioController from "../controllers/audio.controller";
 import { isLogged } from "../libs/auth.lib";
 
 const AudioRouter : Router = Router();
 
+AudioRouter.get('/audio/query', isLogged, audioController.query);
 AudioRouter.get('/audio/stream/:id', isLogged,audioController.stream);
 AudioRouter.get('/audio/:id', isLogged, audioController.getById);
 AudioRouter.get('/audio/', isLogged, audioController.getAll);
