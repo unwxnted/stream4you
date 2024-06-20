@@ -12,6 +12,16 @@ const prisma = new PrismaClient();
 
 class AudioController {
 
+    async getAll(req : Request, res: Response){
+        try{
+            const audios = await prisma.audio.findMany();
+            return res.json(audios);
+        }catch(e){
+            console.error(e);
+            return res.status(500).json({'Error': 'Error on returning data'});
+        }
+    }
+
     async getById(req: Request, res: Response) {
         const { id } = req.params;
         if (id === undefined) return res.status(400).json({ 'Error': 'id missing' });
