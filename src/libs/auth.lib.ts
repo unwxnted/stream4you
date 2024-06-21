@@ -26,7 +26,7 @@ export const matchPassword = async (password: string, savedPasword : string) =>{
 };
 
 export const isLogged = async (req: CustomRequest, res: Response, next : NextFunction) => {
-    const token = req.headers['authorization'];
+    const token = req.headers['Authorization'] as string | undefined;
     if(token === undefined) return res.status(400).json({'Error': 'Token Missing'});
     req.jwt = token;
     jsonwebtoken.verify(req.jwt, SECRET, (err : any, data : any) => {
