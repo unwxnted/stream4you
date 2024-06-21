@@ -2,12 +2,12 @@ import { prisma, esClient } from '../libs/clients.lib'
 import { Request, Response } from "express";
 import { removeFile } from "../libs/file.lib";
 import ffmpeg from "fluent-ffmpeg";
-import * as ffmpegInstaller from "@ffmpeg-installer/ffmpeg"
+import * as ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import * as ffprobeInstaller from "@ffprobe-installer/ffprobe";
+import fs from 'fs';
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-
-import * as fs from 'fs';
-
+ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 class AudioController {
 
@@ -67,7 +67,7 @@ class AudioController {
     async stream(req: Request, res: Response) {
         const { id } = req.params;
         let rate: number = parseInt(req.query.rate as string) as number;
-        if (isNaN(rate)) rate = 128;
+        if (isNaN(rate)) rate = 256;
         let range: string | undefined = req.headers.range;
 
         const audio_id: number = parseInt(id);
@@ -77,7 +77,6 @@ class AudioController {
         const fileSize = fs.statSync(filePath).size;
 
         let fileStream;
-
         if (range !== undefined) {
             const parts = range.replace(/bytes=/, "").split("-");
             const start = parseInt(parts[0], 10);
@@ -149,6 +148,7 @@ class AudioController {
             index: 'audio',
             id: audio.id.toString(),
             body: {
+                id: audio.id,
                 title: audio.title,
                 artist: audio.artist,
                 genre: audio.genre,
