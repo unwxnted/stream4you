@@ -32,18 +32,18 @@ class AudioController {
             let body;
             esClient.search(query)
                 .then(resp => {
-                    body=resp.hits.hits;
-                    body = body.map(hit=>hit._source);
+                    body = resp.hits.hits;
+                    body = body.map(hit => hit._source);
                     res.json(body);
                 })
                 .catch(err => {
                     console.log(err);
                     return res.sendStatus(500);
                 });
-            
-        }catch(e){
+
+        } catch (e) {
             console.log(e);
-            return res.status(500).json({'Error': 'Error on Searching process'});
+            return res.status(500).json({ 'Error': 'Error on Searching process' });
         }
     }
 
@@ -67,7 +67,7 @@ class AudioController {
     async stream(req: Request, res: Response) {
         const { id } = req.params;
         let rate: number = parseInt(req.query.rate as string) as number;
-        if (isNaN(rate)) rate = 256;
+        //if (isNaN(rate)) rate = 128;
         let range: string | undefined = req.headers.range;
 
         const audio_id: number = parseInt(id);
@@ -98,6 +98,12 @@ class AudioController {
             });
             fileStream = fs.createReadStream(filePath);
             try {
+
+                if (isNaN(rate)) {
+                    fileStream.pipe(res);
+                    return;
+                }
+                
                 ffmpeg(fileStream)
                     .audioBitrate(rate)
                     .format('mp3')
@@ -105,6 +111,7 @@ class AudioController {
                         console.log(e);
                     })
                     .pipe(res, { end: true });
+
             } catch (e) {
                 console.log(e);
             }
@@ -132,7 +139,7 @@ class AudioController {
             }
         });
 
-        if(user_id.length < 1) return res.status(404).json({'Error':'User Not found'});
+        if (user_id.length < 1) return res.status(404).json({ 'Error': 'User Not found' });
 
         const audio = await prisma.audio.create({
             data: {

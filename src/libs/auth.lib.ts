@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as jsonwebtoken from "jsonwebtoken";
 import * as bcrypt from 'bcrypt';
 import { RequestOptions } from "https";
+import cookieParser from 'cookie-parser';
 
 const {SECRET} : any = process.env;
 
@@ -25,13 +26,26 @@ export const matchPassword = async (password: string, savedPasword : string) =>{
     
 };
 
-export const isLogged = async (req: CustomRequest, res: Response, next : NextFunction) => {
-    const token = req.headers['Authorization'] as string | undefined;
-    if(token === undefined) return res.status(400).json({'Error': 'Token Missing'});
-    req.jwt = token;
-    jsonwebtoken.verify(req.jwt, SECRET, (err : any, data : any) => {
-        if(!err) return next();
-        console.log(err);
-        return res.status(403).json({'Error': 'Token not valid'});
-    });
-}
+export const isLogged = async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const token = req.headers['authorization'] as string | undefined;
+    const cookie = req.cookies.jwt;
+    
+    if (token === undefined && cookie === undefined) {
+        return res.status(400).json({ 'Error': 'Token Missing' });
+    }
+
+    const handleVerify = (err: any, data: any) => {
+        if (err) {
+            console.log(err);
+            return res.status(403).json({ 'Error': 'Token not valid' });
+        }
+        return next();
+    };
+
+    if (token !== undefined) {
+        req.jwt = token;
+        return jsonwebtoken.verify(token, SECRET, handleVerify);
+    }
+        
+    return jsonwebtoken.verify(cookie, SECRET, handleVerify);
+};
