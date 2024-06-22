@@ -5,6 +5,10 @@ import * as jsonwebtoken from 'jsonwebtoken';
 
 const { SECRET }: any = process.env;
 
+interface CustomRequest extends Request {
+    jwt?: string;
+}
+
 class UserController {
 
     async signup(req: Request, res: Response) {
@@ -31,7 +35,7 @@ class UserController {
     }
 
 
-    async signin(req: Request, res: Response){
+    async signin(req: CustomRequest, res: Response){
         const {name, password} = req.body;
         if(name === undefined || password === undefined) return res.sendStatus(400);
         try{
@@ -54,6 +58,7 @@ class UserController {
                     }
                 });
                 res.cookie('jwt', jwt, {maxAge: 900000, httpOnly: true});
+                req.jwt = jwt;
                 return res.json({name, jwt});
             }
 

@@ -46,6 +46,7 @@ export const isLogged = async (req: CustomRequest, res: Response, next: NextFunc
         req.jwt = token;
         return jsonwebtoken.verify(token, SECRET, handleVerify);
     }
-        
+    
+    req.jwt = cookie;
     return jsonwebtoken.verify(cookie, SECRET, handleVerify);
 };

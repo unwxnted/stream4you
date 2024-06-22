@@ -1,7 +1,8 @@
-import { prisma, esClient } from '../libs/clients.lib'
+import { prisma, esClient, redis } from '../libs/clients.lib'
 import { Request, Response } from "express";
 import { removeFile } from "../libs/file.lib";
 import ffmpeg from "fluent-ffmpeg";
+import { promisify } from 'util';
 import * as ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
 import * as ffprobeInstaller from "@ffprobe-installer/ffprobe";
 import fs from 'fs';
@@ -9,11 +10,18 @@ import fs from 'fs';
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
+const stat = promisify(fs.stat);
+
 class AudioController {
 
     async getAll(req: Request, res: Response) {
         try {
+            const redisData = await redis.get('all-audios');
+            if(redisData) return res.json(JSON.parse(redisData));
+            
             const audios = await prisma.audio.findMany();
+            await redis.set('all-audios', JSON.stringify(audios));
+
             return res.json(audios);
         } catch (e) {
             console.error(e);
@@ -29,11 +37,14 @@ class AudioController {
                 q: ''
             };
             if (search !== undefined) query.q = search.toString();
+            const redisData = await redis.get(`query-${search}`) as string;
+            if(redisData) return res.json(JSON.parse(redisData));
             let body;
             esClient.search(query)
                 .then(resp => {
                     body = resp.hits.hits;
                     body = body.map(hit => hit._source);
+                    redis.set(`query-${search}`, JSON.stringify(body));
                     res.json(body);
                 })
                 .catch(err => {
@@ -49,15 +60,17 @@ class AudioController {
 
     async getById(req: Request, res: Response) {
         const { id } = req.params;
-        console.log(id)
         if (id === undefined) return res.status(400).json({ 'Error': 'id missing' });
         try {
+            const redisData = await redis.get(`id-${id}`);
+            if(redisData) return res.json(JSON.parse(redisData));
             const audio = await prisma.audio.findUnique({
                 where: {
                     id: parseInt(id)
                 }
             });
             if (!audio) return res.status(404).json({ 'Error': 'Song not found' });
+            await redis.set(`id-${id}`, JSON.stringify(audio));
             return res.json(audio);
         } catch {
             return res.status(500).json({ 'Error': 'Internal Server Error' });
@@ -67,14 +80,24 @@ class AudioController {
     async stream(req: Request, res: Response) {
         const { id } = req.params;
         let rate: number = parseInt(req.query.rate as string) as number;
-        //if (isNaN(rate)) rate = 128;
         let range: string | undefined = req.headers.range;
 
         const audio_id: number = parseInt(id);
+        const cacheKey = `audio_${audio_id}_${rate}_${range || 'full'}`;
+
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+            const buffer = Buffer.from(cachedData, 'base64');
+            res.setHeader('Content-Length', buffer.length);
+            res.setHeader('Content-Type', 'audio/mpeg');
+            res.status(range ? 206 : 200).end(buffer);
+            return;
+        }
+
         const audio = await prisma.audio.findUnique({ where: { id: audio_id } });
         if (!audio) return res.sendStatus(404);
         const filePath = `uploads/${audio.path}`;
-        const fileSize = fs.statSync(filePath).size;
+        const fileSize = (await stat(filePath)).size;
 
         let fileStream;
         if (range !== undefined) {
@@ -89,34 +112,46 @@ class AudioController {
                 "Content-Type": "audio/mpeg"
             });
             fileStream = fs.createReadStream(filePath, { start, end });
+            fileStream.on('data', async (chunk) => {
+                await redis.append(cacheKey, chunk);
+            });
             fileStream.pipe(res);
-
         } else {
             res.writeHead(200, {
                 'Content-Type': 'audio/mpeg',
                 'Content-Length': fileSize
             });
             fileStream = fs.createReadStream(filePath);
+            let data : any = [];
             try {
-
                 if (isNaN(rate)) {
+                    fileStream.on('data', chunk => data.push(chunk));
+                    fileStream.on('end', async () => {
+                        const buffer = Buffer.concat(data);
+                        await redis.set(cacheKey, buffer.toString('base64'));
+                        res.end(buffer);
+                    });
                     fileStream.pipe(res);
                     return;
                 }
-                
+
                 ffmpeg(fileStream)
                     .audioBitrate(rate)
                     .format('mp3')
+                    .on('data', chunk => data.push(chunk))
+                    .on('end', async () => {
+                        const buffer = Buffer.concat(data);
+                        await redis.set(cacheKey, buffer.toString('base64'));
+                        res.end(buffer);
+                    })
                     .on('error', (e) => {
                         console.log(e);
                     })
                     .pipe(res, { end: true });
-
             } catch (e) {
                 console.log(e);
             }
         }
-
     }
 
     async post(req: Request, res: Response) {
@@ -130,16 +165,15 @@ class AudioController {
             return res.sendStatus(400);
         }
 
-        const user_id: any = await prisma.user.findFirst({
+        const user: any = await prisma.user.findFirst({
             where: {
-                jwt
-            },
-            select: {
-                id: true
+                jwt: (jwt!==undefined ? jwt : req.cookies.jwt)
             }
         });
 
-        if (user_id.length < 1) return res.status(404).json({ 'Error': 'User Not found' });
+        if (user === undefined) return res.status(404).json({ 'Error': 'User Not found' });
+
+        await redis.del('all-audios');
 
         const audio = await prisma.audio.create({
             data: {
@@ -147,7 +181,7 @@ class AudioController {
                 artist,
                 genre,
                 path: filename,
-                user_id: user_id['id']
+                user_id: user.id
             }
         })
 
