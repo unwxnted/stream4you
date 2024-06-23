@@ -1,0 +1,26 @@
+body{
+  background-color: #161f27;
+  color: rgb(196, 192, 192);
+}
+
+.App {
+  text-align: center;
+}
+
+input {
+  margin: 10px;
+  padding: 5px;
+}
+
+button {
+  margin: 10px;
+  padding: 10px;
+}
+
+form div {
+  margin-bottom: 15px;
+}
+
+label {
+  margin-right: 10px;
+}

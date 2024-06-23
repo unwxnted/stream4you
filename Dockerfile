@@ -27,6 +27,6 @@ RUN npm install
 COPY entrypoint.sh /usr/src/app/entrypoint.sh
 RUN chmod +x /usr/src/app/entrypoint.sh
 
-EXPOSE 3000 9200 5432 6379
+EXPOSE 3001 9200 5432 6379
 
 CMD ["/usr/src/app/entrypoint.sh"]
