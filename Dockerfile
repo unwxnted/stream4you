@@ -24,6 +24,11 @@ COPY . .
 
 RUN npm install
 
+WORKDIR /usr/src/app/frontend/music-player
+RUN npm install && npm run build
+
+WORKDIR /usr/src/app
+
 COPY entrypoint.sh /usr/src/app/entrypoint.sh
 RUN chmod +x /usr/src/app/entrypoint.sh
 
