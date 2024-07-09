@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { getCookie } from "../utils/cookies";
+import MusicPlayer from "./MusicPlayer";
+import Player from "./Player";
+import { Link } from "react-router-dom";
 
-const MusicSearcher = () => {
+const Music = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
 
@@ -14,7 +17,12 @@ const MusicSearcher = () => {
                     'authorization': `${jwt}`
                 }
             });
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) {
+                if(response.status===403){
+                    window.location.href='http://localhost:3000/signin'
+                }
+                return;
+            }
             const data = await response.json();
             setSearchResults(data);
         } catch (e) {
@@ -29,6 +37,7 @@ const MusicSearcher = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         searchQuery();
+        document.getElementById("results").innerHTML="Results:";
     };
 
     return (
@@ -41,19 +50,24 @@ const MusicSearcher = () => {
                     onChange={handleInputChange}
                     placeholder="Search for music"
                 />
-                <button type="submit">Search</button>
+                <button type="submit">Search</button> 
+                <Link to="/upload">
+                    <button>Upload a Song</button>
+                </Link>
+                
             </form>
             <div>
-                <h2>Results:</h2>
+                <h2 id="results"></h2>
                 <ul>
                     {searchResults.map((result, index) => (
-                        <li key={index}> ID: {result.song_id}, Title: {result.title}</li>
+                        <li key={index}> Title: {result.title}, Artist: {result.artist}  <Player id={result.song_id}/></li> 
                         
                     ))}
                 </ul>
             </div>
+            
         </div>
     );
 };
 
-export default MusicSearcher;
+export default Music;

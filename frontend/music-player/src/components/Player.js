@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { getCookie } from '../utils/cookies';
 
-const MusicPlayer = () => {
+const Player = ({id}) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [audioSrc, setAudioSrc] = useState('');
     const [audioId, setAudioId] = useState('');
@@ -21,8 +21,9 @@ const MusicPlayer = () => {
         setError(null);
         setAudioSrc(''); 
         try {
+            console.log(id);
             const jwt = getCookie('jwt');
-            const response = await fetch(`http://localhost:3001/api/audio/stream/${audioId}`, {
+            const response = await fetch(`http://localhost:3001/api/audio/stream/${id}`, {
                 headers: {
                     'authorization': `${jwt}`
                 }
@@ -44,23 +45,20 @@ const MusicPlayer = () => {
         }
     };
 
+    useEffect(() => {
+         handleLoadAudio();
+    }, []);
+
     return (
         <div>
-            <h1>Music Player</h1>
-            <input
-                type="text"
-                placeholder="Enter Audio ID"
-                value={audioId}
-                onChange={(e) => setAudioId(e.target.value)}
-            />
-            <button onClick={handleLoadAudio}>Load Audio</button>
+            {/* <button onClick={handleLoadAudio}>Load Audio</button> */}
             {error && <p style={{color: 'red'}}>{error}</p>}
             <audio ref={audioRef} src={audioSrc} controls />
-            <button onClick={handlePlayPause}>
+            {/* <button onClick={handlePlayPause}>
                 {isPlaying ? 'Pause' : 'Play'}
-            </button>
+            </button> */}
         </div>
     );
 };
 
-export default MusicPlayer;
+export default Player;

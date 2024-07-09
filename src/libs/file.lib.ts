@@ -1,10 +1,11 @@
 import { Response, Request } from "express";
 import multer from "multer";
 import * as fs from "fs";
+import * as path from 'node:path';
 
 export const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "uploads");
+        cb(null,  path.join(__dirname, '..', '..','/uploads/'));
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + file.originalname);
@@ -13,7 +14,8 @@ export const storage = multer.diskStorage({
 
 export const removeFile = (filename : any) => {
 
-    const filePath = './uploads/' + filename; 
+    const filePath = './uploads/' + filename;
+    
     try {
         fs.access(filePath, fs.constants.F_OK, (err) => {
             if (err) {

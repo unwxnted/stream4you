@@ -6,6 +6,7 @@ import { promisify } from 'util';
 import * as ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
 import * as ffprobeInstaller from "@ffprobe-installer/ffprobe";
 import fs from 'fs';
+import * as path from 'node:path';
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 ffmpeg.setFfprobePath(ffprobeInstaller.path);
@@ -96,7 +97,7 @@ class AudioController {
 
         const audio = await prisma.audio.findUnique({ where: { id: audio_id } });
         if (!audio) return res.sendStatus(404);
-        const filePath = `uploads/${audio.path}`;
+        const filePath = path.join(__dirname, '..', '..','/uploads/', audio.path);
         const fileSize = (await stat(filePath)).size;
 
         let fileStream;

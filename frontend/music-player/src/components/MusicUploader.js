@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getCookie } from '../utils/cookies';
+import { Link } from 'react-router-dom';
 
 const MusicUploader = () => {
     const [title, setTitle] = useState('');
@@ -74,6 +75,9 @@ const MusicUploader = () => {
                     <input type="file" id="file" onChange={handleFileChange} />
                 </div>
                 <button type="submit">Upload</button>
+                <Link to="/music">
+                    <button>Search Songs</button>
+                </Link>
             </form>
             {message && <p>{message}</p>}
         </div>
