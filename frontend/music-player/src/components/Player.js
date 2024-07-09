@@ -1,21 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getCookie } from '../utils/cookies';
 
 const Player = ({id}) => {
-    const [isPlaying, setIsPlaying] = useState(false);
     const [audioSrc, setAudioSrc] = useState('');
-    const [audioId, setAudioId] = useState('');
     const [error, setError] = useState(null);
-    const audioRef = useRef(null);
-
-    const handlePlayPause = () => {
-        if (isPlaying) {
-            audioRef.current.pause();
-        } else {
-            audioRef.current.play();
-        }
-        setIsPlaying(!isPlaying);
-    };
 
     const handleLoadAudio = async () => {
         setError(null);
@@ -46,17 +34,13 @@ const Player = ({id}) => {
     };
 
     useEffect(() => {
-         handleLoadAudio();
+        handleLoadAudio();
     }, []);
 
     return (
         <div>
-            {/* <button onClick={handleLoadAudio}>Load Audio</button> */}
             {error && <p style={{color: 'red'}}>{error}</p>}
-            <audio ref={audioRef} src={audioSrc} controls />
-            {/* <button onClick={handlePlayPause}>
-                {isPlaying ? 'Pause' : 'Play'}
-            </button> */}
+            <audio src={audioSrc} controls />
         </div>
     );
 };

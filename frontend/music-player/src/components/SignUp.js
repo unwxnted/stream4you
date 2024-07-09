@@ -27,7 +27,6 @@ const SignUp = () => {
             document.cookie = `jwt=${data.jwt}; path=/;`;
             setMessage('Signup successful!');
             console.log('Response:', data);
-            console.log(document.cookie);
         } catch (error) {
             console.error('Error:', error);
             setMessage('Signup failed. Please try again.');

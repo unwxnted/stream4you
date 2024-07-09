@@ -45,7 +45,6 @@ const SignIn = () => {
             document.cookie = `jwt=${data.jwt}; path=/;`;
             setMessage('Signin successful!');
             console.log('Response:', data);
-            console.log(document.cookie);
             window.location.href="http://localhost:3000/music"
         } catch (error) {
             console.error('Error:', error);

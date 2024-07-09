@@ -1,10 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
-import MusicPlayer from './components/MusicPlayer';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
-import MusicSearcher from './components/MusicSearcher';
 import MusicUploader from './components/MusicUploader';
 import Music from './components/Music';
 

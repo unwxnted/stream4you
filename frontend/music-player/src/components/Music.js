@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { getCookie } from "../utils/cookies";
-import MusicPlayer from "./MusicPlayer";
 import Player from "./Player";
 import { Link } from "react-router-dom";
 
@@ -36,6 +35,7 @@ const Music = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
+        setSearchResults([]);
         searchQuery();
         document.getElementById("results").innerHTML="Results:";
     };
