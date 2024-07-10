@@ -59,7 +59,7 @@ After setting up and configuring the application, you can access the backend API
 
 - Audio Model:
 
-Specifies the schema for audio content, linking each track to its owner and containing metadata like title, genre, and artist.
+  Specifies the schema for audio content, linking each track to its owner and containing metadata like title, genre, and artist.
 
 
 ## Contributing
