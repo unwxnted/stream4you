@@ -60,7 +60,11 @@ const Music = () => {
                 <h2 id="results"></h2>
                 <ul>
                     {searchResults.map((result, index) => (
-                        <li key={index}> Title: {result.title}, Artist: {result.artist}  <Player id={result.song_id}/></li> 
+                        <div class="card" key={index}>
+                            <h1>{result.title}</h1>
+                            <p>Artist: {result.artist}</p>
+                            <Player id={result.song_id}/>
+                        </div>
                         
                     ))}
                 </ul>

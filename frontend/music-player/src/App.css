@@ -1,25 +1,30 @@
 body {
-  font-family: 'Arial', sans-serif; /* Fuente clara y legible */
+  font-family: 'Arial', sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Asegura que el body ocupe toda la altura de la ventana */
+  height: 100vh;
   margin: 0;
   background-color: #161f27;
-  color: rgb(196, 192, 192); /* Color del texto claro sobre el fondo oscuro */
+  color: rgb(196, 192, 192);
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
 
 .App {
-  width: 80%; /* Ancho del contenido centrado */
-  max-width: 1200px; /* Tamaño máximo del contenido para pantallas grandes */
-  background-color: rgba(255, 255, 255, 0.1); /* Fondo ligeramente transparente para resaltar el contenido */
+  width: 80%;
+  max-width: 1200px;
+  background-color: rgba(255, 255, 255, 0.1);
   padding: 20px;
-  border-radius: 8px; /* Bordes redondeados para un aspecto más suave */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para dar profundidad */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 
-input, button {
+input,
+button {
   border: none;
   outline: none;
   border-radius: 5px;
@@ -27,7 +32,8 @@ input, button {
   margin: 10px;
 }
 
-input[type="text"], input[type="email"] {
+input[type="text"],
+input[type="email"] {
   background-color: #ffffff;
   color: #333;
   padding: 10px;
@@ -63,18 +69,18 @@ audio {
   width: 100%;
   max-width: 600px;
   margin: 20px auto;
-  background-color: #161f27;
+  background-color: #2b415500;
   color: rgb(196, 192, 192);
 }
 
-/* Panel de controles */
+
 audio::-webkit-media-controls-panel {
   background-color: #464141;
   color: rgb(196, 192, 192);
   border-radius: 10px;
 }
 
-/* Botón de reproducción/pausa */
+
 audio::-webkit-media-controls-play-button,
 audio::-webkit-media-controls-pause-button {
   background-color: #007bff;
@@ -82,7 +88,7 @@ audio::-webkit-media-controls-pause-button {
   border-radius: 50%;
 }
 
-/* Deslizador de volumen */
+
 audio::-webkit-media-controls-volume-slider-container {
   background-color: #333;
 }
@@ -91,16 +97,23 @@ audio::-webkit-media-controls-volume-slider {
   background-color: #555;
 }
 
-/* Texto de tiempo */
+
 audio::-webkit-media-controls-current-time-display,
 audio::-webkit-media-controls-time-remaining-display {
   color: rgb(196, 192, 192);
 }
 
-/* Botones de avance/reproducción */
 audio::-webkit-media-controls-seek-back-button,
 audio::-webkit-media-controls-seek-forward-button {
   background-color: #007bff;
   color: rgb(196, 192, 192);
   border-radius: 50%;
+}
+
+.card {
+  background-color: rgba(50, 59, 71, 0.226);
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 40px;
+  width: 100%;
 }
