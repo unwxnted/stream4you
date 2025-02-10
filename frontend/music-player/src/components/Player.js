@@ -16,6 +16,7 @@ const Player = ({id}) => {
                     'authorization': `${jwt}`
                 }
             });
+            console.log(jwt)
             if (!response.ok) throw new Error('Network response was not ok');
             
             const contentType = response.headers.get('Content-Type');

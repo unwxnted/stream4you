@@ -177,7 +177,9 @@ class AudioController {
         await redis.del('all-audios');
 
         const keys = await redis.keys('query-*');
-        redis.del(keys);
+        for (const key of keys) {
+            await redis.del(key);
+        }
         
         const audio = await prisma.audio.create({
             data: {
